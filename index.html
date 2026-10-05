@@ -13,11 +13,13 @@
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
 body{margin:0;padding:0;min-height:100vh;min-height:100dvh;height:100%;display:flex;justify-content:center;align-items:stretch;font-family:Urbanist,"Segoe UI",system-ui,sans-serif;color:#fff;background:#010805;overflow-x:hidden}
+/* Wide screen: show decorative background + centered card */
+@media(min-width:600px){body{background:#010805 radial-gradient(ellipse 60% 70% at 20% 50%,#04452a55,transparent 70%),radial-gradient(ellipse 50% 60% at 80% 50%,#04452a44,transparent 70%);align-items:center;padding:24px 0}.app{border-radius:44px;min-height:min(860px,96vh);height:min(860px,96vh);box-shadow:0 0 0 1px #ffffff18,0 40px 100px #000c,0 0 80px -20px #00c76433}}
 .app{position:relative;width:100%;max-width:480px;min-height:100vh;min-height:100dvh;height:100%;margin:0 auto;border:0;border-radius:0;overflow:hidden;background:linear-gradient(180deg,#0dc46a 0,#0a9455 12%,#04452a 24%,#010805 36%,#000 50%);box-shadow:none}
 .isl{display:none!important}
 #view{position:absolute;inset:0;overflow-y:auto;padding:calc(16px + env(safe-area-inset-top,0px)) 20px calc(88px + env(safe-area-inset-bottom,0px));scrollbar-width:none;-webkit-overflow-scrolling:touch}
 #view::-webkit-scrollbar{display:none}
-.bar{display:flex;justify-content:space-between;margin-bottom:16px}
+.bar{display:flex;justify-content:space-between;margin-bottom:20px}
 .gb{width:52px;height:52px;border-radius:50%;background:#0b8f4d99;border:0;color:#dff;display:grid;place-items:center;font:600 20px Urbanist;cursor:pointer;box-shadow:inset 0 0 0 1px #ffffff14}
 .lb{font-size:18px;color:#d4f3e2;font-weight:500}
 .bal{font-size:54px;font-weight:600;letter-spacing:-1.5px;line-height:1.1;background:linear-gradient(180deg,#fff 20%,#a8dcc0);-webkit-background-clip:text;background-clip:text;color:transparent}
@@ -92,8 +94,8 @@ input[type=datetime-local]{color-scheme:dark}
 .hold::after{content:"";position:absolute;inset:0;border-radius:50%;pointer-events:none;box-shadow:inset 0 0 calc(var(--p)*10px) #00ff7a,0 0 calc(var(--p)*16px) #00c76499;opacity:var(--p)}
 .hold::before{content:"";position:absolute;inset:0;border-radius:50%;pointer-events:none;opacity:min(1,calc(var(--p)*40));background:radial-gradient(circle at 50% 118%,#000 0,#000 calc(var(--p)*100%),#0b0b0bd9 calc(var(--p)*100% + 7%),transparent calc(var(--p)*100% + 18%))}
 .hold svg{position:relative}
-.gr{font-size:24px;font-weight:700;margin:0 0 2px;color:#eafff3}
-.gs{font-size:14px;color:#a8dcc0;margin:0 0 12px}
+.gr{font-size:36px;font-weight:800;letter-spacing:-1px;margin:30px 0 4px;color:#eafff3;line-height:1.1}
+.gs{font-size:17px;color:#a8dcc0;margin:0 0 24px;font-weight:500}
 .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
 #dr{overflow:hidden}
 .tog>span{max-width:62%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -134,7 +136,19 @@ function mon(k){var n=new Date(),a=new Date(n.getFullYear(),n.getMonth()-k,1),b=
  S.tx.forEach(function(t){if(!t.p&&t.t>=a&&t.t<b){t.a>0?r.i+=t.a:r.e-=t.a}});r.k=a.getFullYear()+"-"+a.getMonth();return r}
 function smooth(p){var d="M"+p[0][0]+" "+p[0][1];for(var i=1;i<p.length;i++){var x=(p[i-1][0]+p[i][0])/2;d+="C"+x+" "+p[i-1][1]+" "+x+" "+p[i][1]+" "+p[i][0]+" "+p[i][1]}return d}
 function header(){var u=S.nt.some(function(x){return!x.r});return '<div class="bar"><button class="gb" onclick="drawer(1)">'+I("menu")+'</button><div style="display:flex;gap:10px"><button class="gb" onclick="go(\'notifs\')">'+I("notifs")+(u?'<i class="dot"></i>':'')+'</button><button class="gb" onclick="F.q=\'\';go(\'activity\')">'+I("search")+'</button></div></div>'}
-function notify(t,b){S.nt.unshift({id:Date.now()+Math.random(),title:t,body:b,t:Date.now(),r:0});S.nt=S.nt.slice(0,50)}
+function notify(t,b,act,ic){
+ S.nt.unshift({id:Date.now()+Math.random(),title:t,body:b,t:Date.now(),r:0,act:act||"",ic:ic||"notifs"});
+ S.nt=S.nt.slice(0,50);
+ if(S.pn===true&&"Notification" in window&&Notification.permission==="granted"){
+  try{
+   if(navigator.serviceWorker&&navigator.serviceWorker.controller){
+    navigator.serviceWorker.ready.then(function(reg){
+     reg.showNotification(t,{body:b,icon:"/icons/icon-192.png",badge:"/icons/icon-96.png"});
+    }).catch(function(){new Notification(t,{body:b,icon:"/icons/icon-192.png"})});
+   }else{new Notification(t,{body:b,icon:"/icons/icon-192.png"})}
+  }catch(e){}
+ }
+}
 function ci(t){var c=CATS.concat(INC).filter(function(x){return x[0]==t.c})[0];return c?c[1]:(t.a>0?"down":"up")}
 var PM="m";
 function ws(d){d=new Date(d);return new Date(d.getFullYear(),d.getMonth(),d.getDate()-((d.getDay()+6)%7))}
@@ -157,8 +171,8 @@ function autoRewind(){var g=wrng(1),key=g[0].getTime();if(S.rwk==key)return;S.rw
 function rwc(x){var w=x.rw,n=w.net,col=n>0?"#3dff85":n<0?"#ff8a8a":"#fff",sg=n>0?"+":n<0?"−":"",dc=n>0?"#3dff85":n<0?"#ff4d5e":"#ffffffb3";
  return '<div class="pn" style="margin-top:12px"><div style="display:flex;justify-content:space-between;align-items:center"><b>'+x.title+'</b>'+(x.r?'':'<i style="width:9px;height:9px;border-radius:50%;background:'+dc+';box-shadow:0 0 8px '+dc+'"></i>')+'</div><div class="lb" style="font-size:13px">'+w.label+'</div><div style="font-size:40px;font-weight:700;color:'+col+';margin:8px 0 2px">'+sg+$(n)+'</div><div class="lb" style="font-size:14px">'+(w.c?(n>0?"You came out ahead this week":n<0?"You spent more than you earned":"You broke even"):"No activity this week")+'</div>'+
  (w.c?'<div class="cr"><span class="cn">Income</span><b class="pos">+'+$(w.i)+'</b></div><div class="cr"><span class="cn">Expenses</span><b>−'+$(w.e)+'</b></div><div class="cr"><span class="cn">Transactions</span><b>'+w.c+'</b></div>'+(w.top?'<div class="cr"><span class="cn">Top spending</span><b>'+w.top[0]+' · '+$(w.top[1])+'</b></div>':""):"")+'</div>'}
-function notifs(){var h='<div class="chips"><button class="chip" onclick="addRewind(0);render()">This week\'s rewind</button>'+(S.nt.length?'<button class="chip" onclick="S.nt=[];save();render()">Clear all</button>':"")+'</div>'+(S.nt.length?S.nt.map(function(x){return x.rw?rwc(x):'<div class="tx"><div class="ic">'+I("notifs",20)+'</div><div><b>'+x.title+'</b><small>'+x.body+' · '+DT(x.t)+'</small></div>'+(x.r?'':'<i style="width:9px;height:9px;border-radius:50%;background:#ff4d5e"></i>')+'</div>'}).join(""):'<div class="lb" style="padding:30px 0;text-align:center">You have no notifications</div>');
- S.nt.forEach(function(x){x.r=1});save();return header()+'<h3 style="margin-top:0;font-size:26px">Notifications</h3>'+h}
+function notifs(){var h='<div class="chips"><button class="chip" onclick="addRewind(0);render()">This week\'s rewind</button>'+(S.nt.length?'<button class="chip" onclick="S.nt=[];save();render()">Clear all</button>':"")+'</div>'+(S.nt.length?S.nt.map(function(x){return x.rw?rwc(x):'<div class="tx"'+(x.act?' onclick="'+x.act+'" style="cursor:pointer"':'')+'><div class="ic">'+I(x.ic||"notifs",20)+'</div><div><b>'+x.title+'</b><small>'+x.body+' · '+DT(x.t)+'</small></div>'+(x.r?'':'<i style="width:9px;height:9px;border-radius:50%;background:#ff4d5e"></i>')+'</div>'}).join(""):'<div class="lb" style="padding:30px 0;text-align:center">You have no notifications</div>');
+ S.nt.forEach(function(x){x.r=1});save();return header()+'<h3 style="margin-top:0;font-size:26px">Notifications</h3><div class="lb" style="font-size:12px;margin:-4px 0 14px">In-app notifications are always on. Device alerts can be toggled in Settings.</div>'+h}
 function breakdown(){var k=(PM=="w"?6:5)-M,g=rng(k),a=g[0],b=g[1],mn=PM=="w"?D(a):a.toLocaleString("en-US",{month:"long"}),sum={},tot=0;
  S.tx.forEach(function(t){if(!t.p&&t.a<0&&t.t>=a&&t.t<b){var c=CATS.some(function(x){return x[0]==t.c})?t.c:"Miscellaneous";sum[c]=(sum[c]||0)-t.a;tot-=t.a}});
  if(!tot)return '<h3>Spending by category</h3><div class="pn lb">No categorized expenses in '+mn+'.</div>';
@@ -181,7 +195,7 @@ function home(){var A=[];if(FT.send)A.push(["send","send","Send"]);if(FT.request
  var qs=FT.send?'<h3>Quick Send</h3><div class="ppl">'+N.map(function(n,i){return '<div class="pp" onclick="start(\'send\',\''+n+'\')">'+av(i)+n+'</div>'}).join("")+'</div>':"";
  var rc=S.tx.slice().sort(function(a,b){return b.t-a.t}).slice(0,4);
  return header()+greet()+'<div class="lb">Total Balance</div><div class="bal" style="font-size:'+bfs()+'px">'+$s(S.bal)+'</div>'+(ac?'<div class="acts">'+ac+'</div>':'<div style="height:2px"></div>')+qs+'<h3>My Cards <a onclick="go(\'cards\')">Manage</a></h3>'+stack()+'<h3>Recent <a onclick="go(\'activity\')">See all</a></h3>'+(rc.length?rc.map(row).join(""):'<div class="lb" style="padding:14px 0">No transactions yet. Tap the + button to add one.</div>')}
-function bfs(){var L=$s(S.bal).length;return L>15?32:L>13?38:L>10?46:54}
+function bfs(){var L=$s(S.bal).length;return L>15?34:L>13?40:L>10?48:58}
 var G1=Math.random(),G2=Math.random(),GP={m:[["Good morning","Morning","Hey"],["Coffee first, then money.","Early start, nice.","Fresh day.","Let's see where things stand."]],a:[["Good afternoon","Hey","Afternoon"],["Halfway through the day.","Lunch sorted?","Quick check-in?","Still going strong."]],e:[["Good evening","Hey","Welcome back"],["Day's almost done.","How'd today go?","Winding down?","Any big spends today?"]],n:[["Hey","Still up","Night owl"],["Late night money check.","Sleep soon, spend less.","It can wait till morning.","Quiet hours."]]};
 function pk(a,r){return a[Math.floor(r*a.length)]}
 function greet(){var h=new Date().getHours(),P=GP[h<5?"n":h<12?"m":h<17?"a":h<21?"e":"n"],n=(S.name||"").trim().split(/\s+/)[0];return '<div class="gr nm">'+pk(P[0],G1)+(n?", "+esc(n):"")+'</div><div class="gs">'+pk(P[1],G2)+'</div>'}
@@ -485,8 +499,29 @@ var _h=home;home=function(){var h=_h().replace(/<h3>My Cards[\s\S]*?(?=<h3>Recen
 var _d=drawer;drawer=function(o){_d(o);var el=document.getElementById("dr"),it=function(v,l,ic,c){return '<button class="item'+(V==v?" on":"")+'" onclick="drawer(0);'+(c||"go(\'"+v+"\')")+'"><span class="ic">'+I(ic)+'</span>'+l+'</button>'};
  el.lastElementChild.insertAdjacentHTML("beforebegin",it("bud","Budgets","target","gbud()")+it("badges","Badges","trophy")+it("theme","Theme","palette"));
  el.insertAdjacentHTML("afterbegin",'<div style="margin-bottom:14px">'+LG(34)+'</div>')};
+function toggleDeviceNotifs(){
+ if(!S.pn){
+  if("Notification" in window){
+   if(Notification.permission==="granted"){
+    S.pn=true;save();toast("Device notifications turned on");render();
+   }else if(Notification.permission!=="denied"){
+    Notification.requestPermission().then(function(p){
+     if(p==="granted"){S.pn=true;toast("Device notifications turned on")}
+     else{S.pn=false;toast("Permission not allowed in device settings")}
+     save();render();
+    });
+   }else{
+    toast("Notifications blocked in device settings");
+   }
+  }else{
+   toast("Not supported in this browser");
+  }
+ }else{
+  S.pn=false;save();toast("Device notifications turned off");render();
+ }
+}
 var _a=account;account=function(){var row=function(l,v,c){return '<div class="tog" onclick="'+c+'" style="cursor:pointer">'+l+'<span style="color:#d4f3e2;font-weight:500">'+v+'</span></div>'};
- return _a().replace('<div class="mrow">',function(m){return row("App lock",S.pin?"On":"Off","pinInit();go(\'pin\')")+row("Budget",budT()>0?$(budT())+"/mo":"Not set","gbud()")+row("Badges",Object.keys(S.bg||{}).length+" / "+BD.length,"go(\'badges\')")+row("Theme",(S.th&&S.th.n)||"Emerald","go(\'theme\')")+row("Categories",(S.cc||[]).length+" custom","CE=cnew();go(\'cats\',{b:\'account\'})")+row("Haptics",S.nh?"Off":"On","S.nh=!S.nh;save();render()")+row("Backup & restore",bkAgo(),"go('backup')")+m})};
+ return _a().replace('<div class="mrow">',function(m){return row("App lock",S.pin?"On":"Off","pinInit();go(\'pin\')")+row("Device notifications",S.pn?"On":"Off","toggleDeviceNotifs()")+row("Budget",budT()>0?$(budT())+"/mo":"Not set","gbud()")+row("Badges",Object.keys(S.bg||{}).length+" / "+BD.length,"go(\'badges\')")+row("Theme",(S.th&&S.th.n)||"Emerald","go(\'theme\')")+row("Categories",(S.cc||[]).length+" custom","CE=cnew();go(\'cats\',{b:\'account\'})")+row("Haptics",S.nh?"Off":"On","S.nh=!S.nh;save();render()")+row("Backup & restore",bkAgo(),"go('backup')")+m})};
 /* ---------- themes ---------- */
 var TH=[["Emerald","#0dc46a","#00c764"],["Ocean","#2f8cff","#3fa8ff"],["Violet","#8b5cf6","#a78bfa"],["Rose","#ec4899","#ff6fb5"],["Sunset","#ff8a3d","#ff4d6d"],["Gold","#d4a017","#ffc933"],["Aurora","#14b8a6","#7c6cff"],["Berry","#d946ef","#6366f1"],["Silver","#7d8794","#eef1f5"]];
 function hx(h){h=h.replace("#","");return[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]}
@@ -725,9 +760,6 @@ function bkRead(f){
  r.onerror=function(){toast("Couldn't read that file")};
  r.onload=function(){var t=document.getElementById("bkIn2");if(!t)return;t.value=String(r.result||"");toast(bkParse(t.value)?"File loaded. Tap Restore":"Not a Grox backup file")};
  r.readAsText(f)}
-document.addEventListener("click",function(e){
- if(S.ab===0||V=="backup"||(lkEl&&lkEl.className)||bkToday())return;
- bkDownload(bkJson(),bkName(),1)},true);
 /* ---------- backup as text (copy / paste) ---------- */
 function bkCode(){return"GROX1:"+btoa(unescape(encodeURIComponent(JSON.stringify(S))))}
 function bkParse(t){
@@ -764,15 +796,14 @@ X.backup=function(){
  return hd("Backup & restore","account")+
  '<div class="zc"><div class="zh">How it works</div><div class="lb" style="'+tx+'">'+
  '<b>Your data lives only in this browser on this phone.</b> Deleting the app or clearing browser data erases it. There is no cloud copy.<br><br>'+
- '<b>Daily auto-save:</b> once a day, the first time you tap in the app, a backup file is saved to your Downloads. Email it to yourself or keep it in Notes or Drive so it survives losing the phone.<br><br>'+
- '<b>Move to another device:</b> save a backup here, send the file (or copied text) to yourself, open Grox on the other device, go to Backup &amp; restore, load the file or paste the text below, then tap Restore twice.<br><br>'+
- '<b>App deleted by mistake?</b> Open Grox again, come back here, load your latest backup and tap Restore twice. With no backup saved, the data cannot be recovered.</div></div>'+
+ '<b>Manual backup:</b> tap below anytime to save your backup file or copy it as text. Grox will also give you a gentle reminder on the home screen once a week.<br><br>'+
+ '<b>Move to another device:</b> save a backup here, send the file (or copied text) to your new phone, open Grox, go to Backup &amp; restore, load the file or paste the text, then tap Restore twice.<br><br>'+
+ '<b>App deleted by mistake?</b> Open Grox again, come back here, load your backup and tap Restore. With no backup saved, data cannot be recovered.</div></div>'+
  '<div class="zc" style="margin-top:14px"><div class="zh">Save backup</div>'+
  '<div class="zrow" style="border-bottom:0;padding:4px 0 6px"><i class="zd"></i><div><b>'+n+' transaction'+(n==1?'':'s')+'</b><small id="bkSt">'+bkAgo()+'</small></div></div>'+
  '<textarea id="bkOut" readonly aria-hidden="true" tabindex="-1" style="position:absolute;left:0;top:0;width:1px;height:1px;opacity:0;pointer-events:none">'+esc(bkCode())+'</textarea>'+
  '<button class="zsv" onclick="bkExport()">Save backup file</button>'+
- '<button class="zsv bkg" onclick="bkCopy()">Copy as text instead</button>'+
- '<div class="tog" style="margin-top:12px">Auto-save once a day<div class="sw'+(S.ab===0?'':' on')+'" onclick="S.ab=S.ab===0?1:0;save();render()"></div></div></div>'+
+ '<button class="zsv bkg" onclick="bkCopy()">Copy as text instead</button></div>'+
  '<div class="zc" style="margin-top:14px"><div class="zh">Restore</div>'+
  '<textarea id="bkIn2" placeholder="Paste backup text here, or load a file" style="'+box+'"></textarea>'+
  '<button class="zsv bkg" onclick="bkPick()">Load backup file</button>'+
@@ -785,9 +816,19 @@ function bkPaste(){
   var tm=setTimeout(fb,2500);
   try{navigator.clipboard.readText().then(function(x){if(done)return;done=1;clearTimeout(tm);if(t){t.value=x||"";toast(x?"Pasted":"Clipboard is empty")}}).catch(function(){clearTimeout(tm);fb()})}catch(e){clearTimeout(tm);fb()}}
  else fb()}
-var _hb=home;home=function(){var h=_hb(),b;
- if(bkToday())b='<div class="lb" style="font-size:12px;text-align:center;margin:18px 0 6px">Backed up today</div>';
- else b='<div class="pn" style="margin-top:18px"><b style="font-size:17px">Back up your data</b><div class="lb" style="font-size:13px;margin:4px 0 12px">Your data lives only on this phone. '+bkAgo()+'. If the app is deleted, it is gone.</div><button class="go" style="height:46px" onclick="bkExport()">Save backup now</button><div style="text-align:center;margin-top:10px"><a class="lb" style="font-size:13px;text-decoration:underline;cursor:pointer" onclick="go(\'backup\')">More options</a></div></div>';
+function bkNeedsWeekly(){if(!S.lb)return(S.tx&&S.tx.length>0);return(Date.now()-S.lb)>=7*864e5}
+function checkWeeklyBackupNotif(){
+ if(bkNeedsWeekly()){
+  var last=(S.bkn||0);
+  if((Date.now()-last)>=7*864e5){
+   S.bkn=Date.now();
+   notify("Weekly backup reminder","It's been "+bkAgo().toLowerCase()+". Tap to save a backup and protect your data.","go('backup')","receipt");
+   save();
+  }
+ }
+}
+var _hb=home;home=function(){checkWeeklyBackupNotif();var h=_hb(),b="";
+ if(bkNeedsWeekly())b='<div class="pn" style="margin-top:18px"><b style="font-size:17px">Weekly backup reminder</b><div class="lb" style="font-size:13px;margin:4px 0 12px">Your data is stored only on this phone. '+bkAgo()+'. Tap below to keep a copy.</div><button class="go" style="height:46px" onclick="bkExport()">Back up now</button><div style="text-align:center;margin-top:10px"><a class="lb" style="font-size:13px;text-decoration:underline;cursor:pointer" onclick="go(\'backup\')">More options</a></div></div>';
  return h+b};
 render();
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){})})}
