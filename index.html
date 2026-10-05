@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Grox Wallet</title>
+<meta name="description" content="A private money tracker. Your data stays on your device.">
+<meta name="theme-color" content="#04452a">
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="favicon.png">
 <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
@@ -786,5 +790,6 @@ var _hb=home;home=function(){var h=_hb(),b;
  else b='<div class="pn" style="margin-top:18px"><b style="font-size:17px">Back up your data</b><div class="lb" style="font-size:13px;margin:4px 0 12px">Your data lives only on this phone. '+bkAgo()+'. If the app is deleted, it is gone.</div><button class="go" style="height:46px" onclick="bkExport()">Save backup now</button><div style="text-align:center;margin-top:10px"><a class="lb" style="font-size:13px;text-decoration:underline;cursor:pointer" onclick="go(\'backup\')">More options</a></div></div>';
  return h+b};
 render();
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){})})}
 </script>
 </body></html>
