@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "app.grox.wallet",
+    "sha256_cert_fingerprints": [
+      "75:93:03:A2:25:7C:FA:F6:D9:8C:75:A7:4D:FA:E1:E8:1F:BA:B0:C1:D0:94:26:8B:50:14:0B:13:C7:D0:44:ED"
+    ]
+  }
+}]
