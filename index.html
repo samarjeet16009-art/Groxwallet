@@ -866,13 +866,6 @@ function checkWeeklyBackupNotif(){
 var _hb=home;home=function(){checkWeeklyBackupNotif();var h=_hb(),b="";
  if(bkNeedsWeekly())b='<div class="pn" style="margin-top:18px"><b style="font-size:17px">Weekly backup reminder</b><div class="lb" style="font-size:13px;margin:4px 0 12px">Your data is stored only on this phone. '+bkAgo()+'. Tap below to keep a copy.</div><button class="go" style="height:46px" onclick="bkExport()">Back up now</button><div style="text-align:center;margin-top:10px"><a class="lb" style="font-size:13px;text-decoration:underline;cursor:pointer" onclick="go(\'backup\')">More options</a></div></div>';
  return h+b};
-try{
- if(!localStorage.getItem("test_v1")){
-  localStorage.setItem("test_v1","1");
-  notify("yes it works","Vercel live update verified! Your APK updated without reinstalling.","","notifs");
-  save();
- }
-}catch(e){}
 render();
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){})})}
 </script>
