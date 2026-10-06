@@ -60,7 +60,7 @@ input::placeholder{color:#8fc7a8}
 #toast{position:absolute;left:50%;top:60px;transform:translateX(-50%);background:#fff;color:#111;padding:9px 16px;border-radius:20px;font-weight:700;font-size:14px;z-index:20;opacity:0;transition:.25s;pointer-events:none;white-space:nowrap}
 #toast.s{opacity:1}
 
-#view{bottom:0!important;padding-bottom:30px}
+#view{bottom:0!important;padding-bottom:calc(36px + env(safe-area-inset-bottom,0px))!important}
 .gb,.act,.ic,.chip:not(.on){position:relative;border:0;color:#fff;background:radial-gradient(75% 48% at 28% 6%,#ffffff8c,transparent 70%),linear-gradient(140deg,#ffffff40,#ffffff0d 45%,#ffffff26);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:inset 1.5px 1.5px 1px #ffffffa6,inset -1px -1px 1.5px #ffffff4d,inset 0 0 14px #ffffff17,0 8px 22px #0000004d;transform:translateZ(0)}
 .act{border-radius:22px;padding:14px 4px}
 .act span{display:grid;place-items:center;margin-bottom:5px;font-size:0}
@@ -281,7 +281,7 @@ function curs(){return hd("Currency","account")+'<div class="lb" style="margin:4
 function cs_(k){return CUR[k][0].trim()}
 function setCur(k){S.cur=k;save();toast("Currency: "+k);go("account")}
 function render(){var v=document.getElementById("view");v.innerHTML={home:home,stats:stats,cards:cards,activity:activity,pay:pay,done:done,account:account,addtx:addtx,edit:edit,notifs:notifs,mtx:mtx,pick:pick,curs:curs}[V]();}
-function fit(){var a=document.getElementById("app"),z=Math.min(1,innerWidth/420),rs=getComputedStyle(document.documentElement),pt=parseFloat(rs.paddingTop)||0,pb=parseFloat(rs.paddingBottom)||0;a.style.zoom=z;a.style.height=Math.min(860,innerHeight/z-32)+"px";if(innerWidth<520){a.style.borderWidth="0";a.style.borderRadius="0";a.style.margin="0";a.style.height=(innerHeight-pt-pb)/z+"px"}}
+function fit(){var a=document.getElementById("app");if(innerWidth<600){a.style.zoom="1";a.style.width="100%";a.style.maxWidth="100%";a.style.height="100%";a.style.minHeight="100dvh";a.style.borderWidth="0";a.style.borderRadius="0";a.style.margin="0"}else{var z=Math.min(1,innerWidth/420);a.style.zoom=z;a.style.width="";a.style.maxWidth="480px";a.style.height=Math.min(860,innerHeight/z-32)+"px"}}
 fit();addEventListener("resize",fit);autoRewind();render();drawer(0);
 document.addEventListener("keydown",function(e){if(V!="addtx"||/INPUT|TEXTAREA/.test(document.activeElement.tagName))return;if(/^[0-9.]$/.test(e.key))tk(e.key);else if(e.key=="Backspace")tk("<")});
 var ST,DG=false,DI=-1;
@@ -383,34 +383,70 @@ target:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circl
 var _I=I;I=function(n,s){var p=NI[n];if(!p)return _I(n,s);s=s||22;return '<svg width="'+s+'" height="'+s+'" viewBox="0 0 24 24" fill="none" stroke="url(#ig)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+p+'</svg>'};
 function hp(s){var h=5381;s="pay|"+s;for(var i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return String(h)}
 function dots(v){var o="";for(var i=0;i<4;i++)o+='<i'+(i<v.length?' class="f"':'')+'></i>';return o}
+function dots2(v){var o="";for(var i=0;i<2;i++)o+='<i'+(i<v.length?' class="f"':'')+'></i>';return o}
 function kpd(f){return '<div class="kpad" style="width:100%">'+["1","2","3","4","5","6","7","8","9","","0","<"].map(function(k){return k===""?'<span></span>':'<button class="kp" onclick="'+f+'(\''+k+'\')">'+(k=="<"?I("bksp",24):k)+'</button>'}).join("")+'</div>'}
 
 /* ---------- PIN lock ---------- */
-var LK={v:"",f:0,u:0,h:0},PS={st:"nw",v:"",n:""};
+var LK={v:"",f:0,u:0,h:0,fp:false,fv:""},PS={st:"nw",v:"",n:""};
 var lkEl=document.createElement("div");lkEl.id="lk";document.getElementById("app").appendChild(lkEl);
-function lkDraw(){lkEl.className="on";lkEl.innerHTML=LG(72)+'<b style="font:800 24px Urbanist;letter-spacing:-.4px;margin-top:14px">Grox</b><div style="font-size:16px;font-weight:600;margin-top:26px">Enter PIN</div><div class="lb" id="lm" style="height:22px;margin-top:6px;font-size:14px"></div><div class="pd" id="pd">'+dots("")+'</div>'+kpd("lkk")}
-function lkk(k){var pd=document.getElementById("pd"),lm=document.getElementById("lm");
+function lkDraw(){
+ lkEl.className="on";
+ if(LK.fp){
+  lkEl.innerHTML=LG(64)+'<b style="font:800 22px Urbanist;letter-spacing:-.4px;margin-top:12px">Forgot PIN</b>'+
+   '<div style="font-size:14px;color:var(--m);margin:8px 0 16px;text-align:center">'+(S.rpin?'Enter your 2-digit recovery PIN to reset':'No recovery PIN was set. Resetting will clear app lock.')+'</div>'+
+   (S.rpin?'<div class="pd" id="rpd">'+dots2(LK.fv)+'</div>'+kpd("rfk_"):'<button class="go" style="margin-top:20px;height:48px;font-size:16px" onclick="rmPin();LK.fp=false;lkEl.className=\'\';">Reset App Lock</button>')+
+   '<button class="chip" style="margin-top:18px" onclick="LK.fp=false;LK.fv=\'\';lkDraw()">Back to PIN</button>';
+  return;
+ }
+ lkEl.innerHTML=LG(72)+'<b style="font:800 24px Urbanist;letter-spacing:-.4px;margin-top:14px">Grox</b>'+
+  '<div style="font-size:16px;font-weight:600;margin-top:26px">Enter PIN</div>'+
+  '<div class="lb" id="lm" style="height:22px;margin-top:6px;font-size:14px"></div>'+
+  '<div class="pd" id="pd">'+dots("")+'</div>'+
+  kpd("lkk")+
+  '<button style="background:none;border:0;color:var(--m);font:600 13px Urbanist;margin-top:18px;cursor:pointer;padding:8px 16px" onclick="LK.fp=true;LK.fv=\'\';lkDraw()">Forgot PIN?</button>';
+}
+function rfk_(k){
+ var rpd=document.getElementById("rpd");
+ if(k=="<")LK.fv=LK.fv.slice(0,-1);else if(LK.fv.length<2)LK.fv+=k;
+ if(rpd)rpd.innerHTML=dots2(LK.fv);
+ if(LK.fv.length<2)return;
+ setTimeout(function(){
+  if(hp(LK.fv)==S.rpin){
+   toast("Recovery PIN verified");delete S.pin;delete S.rpin;save();LK.fp=false;LK.fv="";LK.v="";lkEl.className="";render();
+  }else{
+   LK.fv="";if(rpd)rpd.innerHTML=dots2("");toast("Wrong 2-digit PIN");navigator.vibrate&&navigator.vibrate(120);
+  }
+ },140);
+}
+function lkk(k){
+ if(LK.fp)return;
+ var pd=document.getElementById("pd"),lm=document.getElementById("lm");
  if(LK.u>Date.now()){lm.textContent="Try again in "+Math.ceil((LK.u-Date.now())/1000)+"s";return}
- if(k=="<")LK.v=LK.v.slice(0,-1);else if(LK.v.length<4)LK.v+=k;pd.innerHTML=dots(LK.v);
+ if(k=="<")LK.v=LK.v.slice(0,-1);else if(LK.v.length<4)LK.v+=k;if(pd)pd.innerHTML=dots(LK.v);
  if(LK.v.length<4)return;
  setTimeout(function(){var ok=hp(LK.v)==S.pin;LK.v="";
   if(ok){LK.f=0;lkEl.className="";return}
-  LK.f++;navigator.vibrate&&navigator.vibrate(120);pd.classList.add("sh");setTimeout(function(){pd.classList.remove("sh")},400);pd.innerHTML=dots("");
-  if(LK.f>=5){LK.f=0;LK.u=Date.now()+30000;lm.textContent="Too many tries. Wait 30s"}else lm.textContent="Wrong PIN"},140)}
-document.addEventListener("keydown",function(e){if(!lkEl.className)return;e.stopImmediatePropagation();if(/^[0-9]$/.test(e.key))lkk(e.key);else if(e.key=="Backspace")lkk("<")},true);
-document.addEventListener("visibilitychange",function(){if(!S.pin)return;if(document.hidden)LK.h=Date.now();else if(Date.now()-LK.h>15000){LK.v="";lkDraw()}});
-function pinInit(){PS={st:S.pin?"cur":"nw",v:"",n:""}}
-function pinv(){var T={cur:"Enter current PIN",nw:"Choose a new PIN",cnf:"Confirm your PIN"};
- if(PS.st=="opt")return hd("App lock","account")+'<div class="lb" style="margin:8px 0 16px">PIN lock is on. The app locks when you leave it for a bit.</div><button class="item" onclick="PS={st:\'nw\',v:\'\',n:\'\'};render()"><span class="ic">'+I("edit",20)+'</span>Change PIN</button><button class="item" onclick="rmPin()"><span class="ic">'+I("trash",20)+'</span>Remove PIN</button>';
+  LK.f++;navigator.vibrate&&navigator.vibrate(120);if(pd)pd.classList.add("sh");setTimeout(function(){if(pd)pd.classList.remove("sh")},400);if(pd)pd.innerHTML=dots("");
+  if(LK.f>=5){LK.f=0;LK.u=Date.now()+30000;if(lm)lm.textContent="Too many tries. Wait 30s"}else if(lm)lm.textContent="Wrong PIN"},140)}
+document.addEventListener("keydown",function(e){if(!lkEl.className)return;e.stopImmediatePropagation();if(/^[0-9]$/.test(e.key)){if(LK.fp)rfk_(e.key);else lkk(e.key)}else if(e.key=="Backspace"){if(LK.fp)rfk_("<");else lkk("<")}},true);
+document.addEventListener("visibilitychange",function(){if(!S.pin)return;if(document.hidden)LK.h=Date.now();else if(Date.now()-LK.h>15000){LK.v="";LK.fp=false;LK.fv="";lkDraw()}});
+function pinInit(){PS={st:S.pin?"opt":"nw",v:"",n:"",r2:""}}
+function pinv(){var T={cur:"Enter current PIN",nw:"Choose a 4-digit PIN",cnf:"Confirm 4-digit PIN",rec:"Set optional 2-digit recovery PIN"};
+ if(PS.st=="opt")return hd("App lock","account")+'<div class="lb" style="margin:8px 0 16px">PIN lock is on. The app locks when you leave it for a bit.</div>'+
+  (S.rpin?'<div class="tog" style="margin-bottom:12px">Recovery PIN<span style="color:#d4f3e2;font-weight:500">2-digit active</span></div>':'<button class="item" onclick="PS={st:\'rec\',v:\'\',n:\'\'};render()"><span class="ic">'+I("target",20)+'</span>Set 2-digit recovery PIN</button>')+
+  '<button class="item" onclick="PS={st:\'nw\',v:\'\',n:\'\'};render()"><span class="ic">'+I("edit",20)+'</span>Change PIN</button>'+
+  '<button class="item" onclick="rmPin()"><span class="ic">'+I("trash",20)+'</span>Remove PIN</button>';
+ if(PS.st=="rec")return hd("App lock","account")+'<div style="text-align:center;margin-top:20px"><div style="font-size:19px;font-weight:700">Set 2-digit recovery PIN</div><div class="lb" style="font-size:13px;margin:6px 0 14px">Used if you ever forget your main 4-digit PIN</div><div class="pd" style="justify-content:center">'+dots2(PS.v)+'</div></div>'+kpd("pk_rec")+'<div style="text-align:center;margin-top:16px"><button class="chip" onclick="go(\'account\')">Skip</button></div>';
  return hd("App lock","account")+'<div style="text-align:center;margin-top:20px"><div style="font-size:20px;font-weight:700">'+T[PS.st]+'</div><div class="pd" style="justify-content:center">'+dots(PS.v)+'</div></div>'+kpd("pk_")}
+function pk_rec(k){if(k=="<")PS.v=PS.v.slice(0,-1);else if(PS.v.length<2)PS.v+=k;render();if(PS.v.length==2)setTimeout(function(){S.rpin=hp(PS.v);save();toast("2-digit recovery PIN set");go("account")},150)}
 function pk_(k){if(k=="<")PS.v=PS.v.slice(0,-1);else if(PS.v.length<4)PS.v+=k;render();if(PS.v.length==4)setTimeout(pnext,150)}
 function pnext(){if(V!="pin")return;var v=PS.v;PS.v="";
  if(PS.st=="cur"){if(hp(v)==S.pin)PS.st="opt";else toast("Wrong PIN")}
  else if(PS.st=="nw"){PS.n=v;PS.st="cnf"}
- else if(v==PS.n){S.pin=hp(v);notify("App lock on","PIN set");save();toast("PIN saved");return go("account")}
+ else if(v==PS.n){S.pin=hp(v);notify("App lock on","PIN set");save();toast("PIN saved");PS.st="rec";PS.v="";render();return}
  else{PS.st="nw";toast("PINs didn't match")}
  render()}
-function rmPin(){delete S.pin;notify("App lock off","PIN removed");save();toast("PIN removed");go("account")}
+function rmPin(){delete S.pin;delete S.rpin;notify("App lock off","PIN removed");save();toast("PIN removed");go("account")}
 
 /* ---------- budgets ---------- */
 function budT(){var b=S.bud;if(!b)return 0;if(b.t>0)return b.t;var s=0;for(var k in b.c)s+=b.c[k];return s}
@@ -830,6 +866,13 @@ function checkWeeklyBackupNotif(){
 var _hb=home;home=function(){checkWeeklyBackupNotif();var h=_hb(),b="";
  if(bkNeedsWeekly())b='<div class="pn" style="margin-top:18px"><b style="font-size:17px">Weekly backup reminder</b><div class="lb" style="font-size:13px;margin:4px 0 12px">Your data is stored only on this phone. '+bkAgo()+'. Tap below to keep a copy.</div><button class="go" style="height:46px" onclick="bkExport()">Back up now</button><div style="text-align:center;margin-top:10px"><a class="lb" style="font-size:13px;text-decoration:underline;cursor:pointer" onclick="go(\'backup\')">More options</a></div></div>';
  return h+b};
+try{
+ if(!localStorage.getItem("test_v1")){
+  localStorage.setItem("test_v1","1");
+  notify("yes it works","Vercel live update verified! Your APK updated without reinstalling.","","notifs");
+  save();
+ }
+}catch(e){}
 render();
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){})})}
 </script>
