@@ -108,7 +108,7 @@ input[type=datetime-local]{color-scheme:dark}
 .cc.rupay{background:linear-gradient(150deg,#2a5cf0,#0b1f6b 55%,#050a25)}
 .ch{position:absolute;left:22px;top:118px;width:38px;height:28px;border-radius:6px;background:linear-gradient(135deg,#f5e6a3,#c9a13b 60%,#e8cf7a);box-shadow:inset 0 0 0 1px #0003}
 .nfc{position:absolute;right:22px;top:118px}
-</style><style>#bkIn2{scrollbar-width:none}#bkIn2::-webkit-scrollbar{display:none}#bkIn2::placeholder{color:#9fd8b8;opacity:.7}#bkIn2:focus{border-color:#ffffff66}.bkg{background:#ffffff14!important;color:#fff!important;box-shadow:inset 0 0 0 1px #ffffff26}</style></head><body><svg width="0" height="0" style="position:absolute"><defs><linearGradient id="ig" gradientUnits="userSpaceOnUse" x1="2" y1="2" x2="22" y2="22"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#8dffc0"/></linearGradient></defs></svg>
+</style><style>#bkIn2{scrollbar-width:none}#bkIn2::-webkit-scrollbar{display:none}#bkIn2::placeholder{color:#9fd8b8;opacity:.7}#bkIn2:focus{border-color:#ffffff66}.bkg{background:#ffffff14!important;color:#fff!important;box-shadow:inset 0 0 0 1px #ffffff26}</style><style>#upq{position:absolute;inset:0;z-index:19;display:flex;align-items:flex-end;background:#000b;-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px)}.upc{width:100%;padding:24px 20px calc(24px + env(safe-area-inset-bottom,0px));border-radius:30px 30px 0 0;background:#06130d;box-shadow:inset 0 1px 0 #ffffff26}.upp{flex:none}#upnote{margin-top:6px}#upv{display:block;width:100%;aspect-ratio:1;object-fit:cover;border-radius:28px;background:#000;box-shadow:0 0 0 1px #ffffff1f}</style></head><body><svg width="0" height="0" style="position:absolute"><defs><linearGradient id="ig" gradientUnits="userSpaceOnUse" x1="2" y1="2" x2="22" y2="22"><stop offset="0" stop-color="#fff"/><stop offset="1" stop-color="#8dffc0"/></linearGradient></defs></svg>
 <div class="app" id="app"><div class="isl"></div><div id="toast"></div><div id="view"></div>
 <div id="ov" onclick="drawer(0)"></div><aside id="dr"></aside></div>
 <script>
@@ -868,5 +868,118 @@ var _hb=home;home=function(){checkWeeklyBackupNotif();var h=_hb(),b="";
  return h+b};
 render();
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){})})}
+</script>
+<script>
+/* ---------- UPI Pay: hands off to the user's own UPI app. Grox never sees the PIN, the bank balance or the result, so the user confirms here afterwards. ---------- */
+(function(){
+var VPA=/^[a-zA-Z0-9.\-_]{2,64}@[a-zA-Z][a-zA-Z0-9]{1,31}$/,IOS=/iPhone|iPad|iPod/.test(navigator.userAgent),
+UP={id:0,a:"",c:"Transfers",note:""},UQ={u:1},UDEL=0,UC=["#f48fb1","#7fd6c2","#ffb84d","#4da3ff","#a48bff","#ff9a76","#3dff85"];
+function pl(){S.up=S.up||[];return S.up}
+function pget(id){return pl().filter(function(p){return p.id==id})[0]}
+function inr(a){return "\u20B9"+a.toLocaleString("en-IN",{minimumFractionDigits:a%1?2:0,maximumFractionDigits:2})}
+function uav(p,s){return '<div class="av" style="width:'+s+'px;height:'+s+'px;margin:0 auto 5px;display:grid;place-items:center;background:'+UC[p.id%UC.length]+';color:#04231a;font:800 '+Math.round(s*.42)+'px Urbanist">'+esc((p.n||"?").trim().charAt(0).toUpperCase())+'</div>'}
+function pend(big){var p=S.upp;if(!p)return"";return '<div class="pn" onclick="upiAsk()" style="cursor:pointer;margin:'+(big?"0 0 14px":"12px 0 0")+';padding:14px 16px"><b>Waiting for confirmation</b><div class="lb" style="font-size:13px;margin-top:2px">'+inr(p.a)+' to '+esc(p.n)+'. Tap to confirm whether it went through.</div></div>'}
+
+function droid(){if(!window.GroxAndroid)return"";var on=false;try{on=GroxAndroid.isEnabled()}catch(e){}
+ return '<div class="pn" style="padding:14px 16px;margin-bottom:12px"><b>FamApp auto-record</b><div class="lb" style="font-size:13px;margin:4px 0 10px">'+(on?'On. Payments you make in FamApp are logged here automatically.':'Off. Turn on Grox in Accessibility settings so it can see FamApp\'s payment screen.')+'</div>'+(on?'':'<button class="go" style="height:44px;font-size:15px" onclick="GroxAndroid.openAccessibility()">Open Accessibility settings</button>')+'<div style="margin-top:10px"><a class="lb" style="font-size:13px;text-decoration:underline;cursor:pointer" onclick="upiDump()">Copy last FamApp screen text (for debugging)</a></div></div>'}
+window.upiDump=function(){try{navigator.clipboard.writeText(GroxAndroid.getDump()).then(function(){toast("Copied")},function(){toast("Could not copy")})}catch(e){toast("Not available")}};
+/* ----- screens ----- */
+window.upiv=function(){var L=pl();
+ return hd("UPI Pay","home")+pend(1)+droid()+
+ '<div class="lb" style="font-size:13px;margin:0 0 12px">Scan a UPI QR, and Grox opens your own UPI app (GPay, PhonePe, Paytm and so on) with the payment filled in. Grox never sees your UPI PIN or bank balance, so you confirm each payment here after paying.</div>'+
+ (S.cur&&S.cur!="INR"?'<div class="pn" style="padding:12px 16px;margin-bottom:12px;font-size:14px">Grox is set to '+esc(S.cur)+', but UPI payments are in \u20B9. <a style="text-decoration:underline;cursor:pointer" onclick="upiInr()">Switch to \u20B9</a></div>':"")+
+ (L.length?L.map(function(p){return '<div class="tx" onclick="upiStart('+p.id+')">'+uav(p,42).replace("margin:0 auto 5px","margin:0")+'<div><b>'+esc(p.n)+'</b><small>'+esc(p.v)+'</small></div><button class="del" onclick="event.stopPropagation();upiDel('+p.id+')">'+I("trash",16)+'</button></div>'}).join(""):'<div class="lb" style="padding:20px 0;text-align:center">No payees yet. Scan someone\'s UPI QR and they are saved for next time.</div>')+
+ '<button class="go" style="margin-top:18px" onclick="go(\'upiscan\')">Scan QR to pay</button><div style="text-align:center;margin-top:14px"><a class="lb" style="text-decoration:underline;cursor:pointer;font-size:14px" onclick="E={};go(\'upiadd\')">Enter a UPI ID instead</a></div>'};
+window.upiaddv=function(){return hd("Add payee","upi")+fld("upname","Name",E.upname||"","Rahul Sharma","text",24)+fld("upvpa","UPI ID",E.upvpa||"","name@bank","email",64)+
+ '<div class="lb" style="font-size:13px;margin-top:10px">Saved only on this phone. Your UPI app shows the registered name before you pay, so check it matches.</div><button class="go" style="margin-top:22px" onclick="upiSave()">Save payee</button>'};
+window.upipayv=function(){var p=pget(UP.id);if(!p)return upiv();var a=parseFloat(UP.a)||0,
+ cats='<div class="chips">'+CATS.map(function(x){return '<button class="chip'+(UP.c==x[0]?" on":"")+'" onclick="UP.c=\''+x[0]+'\';render()">'+x[0]+'</button>'}).join("")+'</div>',
+ pad='<div class="pad">'+"123456789.0<".split("").map(function(k){return '<button onclick="upk(\''+k+'\')">'+(k=="<"?I("bksp",24):k)+'</button>'}).join("")+'</div>',
+ note='<input id="upnote" maxlength="40" placeholder="Note (optional)" value="'+esc(UP.note)+'" oninput="UP.note=this.value">',
+ btn=IOS?'<div style="display:flex;gap:8px;margin-top:14px"><button class="go" style="height:50px;font-size:15px" onclick="upiGo(\'gpay://upi/pay?\')">GPay</button><button class="go" style="height:50px;font-size:15px" onclick="upiGo(\'phonepe://pay?\')">PhonePe</button><button class="go" style="height:50px;font-size:15px" onclick="upiGo(\'paytmmp://pay?\')">Paytm</button></div>':'<button class="go" style="margin-top:14px" onclick="upiGo()">Pay'+(a>0?" "+inr(a):"")+' with UPI</button>';
+ return hd("Pay via UPI","upi")+'<div style="text-align:center">'+uav(p,56)+'<b>'+esc(p.n)+'</b><div class="lb" style="font-size:13px">'+esc(p.v)+'</div></div><div class="amt">\u20B9'+(UP.a||"0")+'</div>'+cats+pad+note+btn+
+ '<div class="lb" style="font-size:13px;text-align:center;margin-top:12px">You pay in your UPI app, then come back here to log it.</div>'};
+
+/* ----- actions ----- */
+window.upiStart=function(id){UP.id=id;UP.a="";UP.c="Transfers";UP.note="";go("upipay")};
+window.upk=function(k){var a=UP.a;if(k=="<")a=a.slice(0,-1);else if(k=="."){if(a.indexOf(".")<0)a=(a||"0")+"."}else if(a.length<9&&!/\.\d\d$/.test(a))a=(a=="0"?"":a)+k;UP.a=a;render()};
+window.upiSave=function(){var n=(E.upname||"").replace(/['"\\<>&]/g,"").trim(),v=(E.upvpa||"").trim().toLowerCase();
+ if(!n)return toast("Enter a name");if(!VPA.test(v))return toast("Enter a valid UPI ID, like name@bank");
+ if(pl().some(function(x){return x.v==v}))return toast("This UPI ID is already saved");if(pl().length>=30)return toast("Payee limit reached");
+ pl().push({id:Date.now(),n:n,v:v});save();E={};toast("Payee saved");go("upi")};
+window.upiDel=function(id){if(UDEL!=id){UDEL=id;setTimeout(function(){UDEL=0},2500);return toast("Tap again to remove this payee")}
+ UDEL=0;S.up=pl().filter(function(p){return p.id!=id});save();toast("Payee removed");render()};
+window.upiInr=function(){S.cur="INR";save();toast("Currency: INR");render()};
+window.upiGo=function(sch){var p=pget(UP.id),a=parseFloat(UP.a);if(!p)return;if(!(a>0))return toast("Enter an amount");if(a>100000)return toast("UPI limit is \u20B91,00,000 per payment");
+ var note=(UP.note||"").replace(/[^\w .,\-]/g,"").trim().slice(0,40);
+ S.upp={id:Date.now(),pid:p.id,n:p.n,v:p.v,a:r2(a),c:UP.c,note:note,t:Date.now()};save();
+ location.href=(sch||"upi://pay?")+"pa="+p.v+"&pn="+encodeURIComponent(p.n)+"&am="+a.toFixed(2)+"&cu=INR"+(note?"&tn="+encodeURIComponent(note):"")};
+
+
+/* ----- QR scanner ----- */
+var SC={stream:null,timer:0,det:null,busy:0};
+function sstat(t){var e=document.getElementById("ups");if(e)e.textContent=t}
+window.upiscanv=function(){setTimeout(scanStart,60);
+ return hd("Scan to pay","upi").replace("onclick=\"go('upi')\"","onclick=\"upiStop();go('upi')\"")+'<video id="upv" playsinline muted autoplay></video><div class="lb" id="ups" style="text-align:center;margin:12px 0">Point at any UPI QR code</div>'+
+ '<label class="go" style="display:grid;place-items:center;font-size:16px;cursor:pointer">Choose a QR image<input type="file" accept="image/*" style="display:none" onchange="upiImg(this)"></label>'+
+ '<div style="text-align:center;margin-top:14px"><a class="lb" style="text-decoration:underline;cursor:pointer;font-size:14px" onclick="upiStop();E={};go(\'upiadd\')">Enter a UPI ID instead</a></div>'};
+function need(cb){try{if(window.BarcodeDetector){SC.det=SC.det||new BarcodeDetector({formats:["qr_code"]});return cb()}}catch(e){SC.det=null}
+ if(window.jsQR)return cb();var j=document.createElement("script");j.src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js";j.onload=cb;j.onerror=function(){sstat("Scanning isn't supported on this browser.")};document.head.appendChild(j)}
+function decode(src){
+ if(SC.det)return SC.det.detect(src).then(function(r){return r.length?r[0].rawValue:null}).catch(function(){return null});
+ if(window.jsQR){var w=src.videoWidth||src.width,h=src.videoHeight||src.height;if(!w)return Promise.resolve(null);var k=Math.min(1,900/Math.max(w,h)),c=document.createElement("canvas");c.width=Math.round(w*k);c.height=Math.round(h*k);var x=c.getContext("2d");x.drawImage(src,0,0,c.width,c.height);var d=x.getImageData(0,0,c.width,c.height),q=jsQR(d.data,c.width,c.height);return Promise.resolve(q?q.data:null)}
+ return Promise.resolve(null)}
+function handle(t){if(!t)return false;var m=/^upi:\/\/pay\?(.*)$/i.exec(String(t).trim());if(!m){sstat("That QR isn't a UPI payment code");return false}
+ var q=new URLSearchParams(m[1]),v=(q.get("pa")||"").trim().toLowerCase();if(!VPA.test(v)){sstat("That UPI QR looks invalid");return false}
+ var n=(q.get("pn")||v.split("@")[0]).replace(/['"\\<>&]/g,"").trim().slice(0,24)||"Payee",p=pl().filter(function(x){return x.v==v})[0];
+ if(!p){if(pl().length>=30){toast("Payee limit reached");return false}p={id:Date.now(),n:n,v:v};pl().push(p);save()}
+ upiStop();upiStart(p.id);var am=parseFloat(q.get("am"));if(am>0&&am<=100000)UP.a=String(r2(am));
+ var tn=(q.get("tn")||"").replace(/[^\w .,\-]/g,"").trim().slice(0,40);if(tn)UP.note=tn;toast("Scanned "+p.n);render();return true}
+window.upiHandle=handle;
+function frame(v){if(SC.busy||!v.videoWidth)return;SC.busy=1;decode(v).then(function(t){SC.busy=0;if(t&&V=="upiscan")handle(t)})}
+function scanStart(){if(V!="upiscan"||SC.stream)return;var v=document.getElementById("upv");if(!v)return;
+ if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)return sstat("Camera isn't available here. Choose a QR image instead.");
+ navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}},audio:false}).then(function(st){
+  if(V!="upiscan"){st.getTracks().forEach(function(t){t.stop()});return}
+  SC.stream=st;v.srcObject=st;v.play().catch(function(){});need(function(){clearInterval(SC.timer);SC.timer=setInterval(function(){frame(v)},300)})
+ }).catch(function(){sstat("Camera permission is blocked. Choose a QR image instead.")})}
+window.upiStop=function(){clearInterval(SC.timer);SC.timer=0;if(SC.stream){SC.stream.getTracks().forEach(function(t){t.stop()});SC.stream=null}};
+window.upiImg=function(inp){var f=inp.files&&inp.files[0];if(!f)return;sstat("Reading the image...");
+ createImageBitmap(f).then(function(bm){need(function(){decode(bm).then(function(t){if(!t)sstat("No UPI QR found in that image");else handle(t)})})}).catch(function(){sstat("Couldn't read that image")})};
+document.addEventListener("visibilitychange",function(){if(V!="upiscan")return;if(document.hidden)upiStop();else scanStart()});
+
+/* ----- "did it go through?" sheet ----- */
+function draw(){var p=S.upp,d=document.getElementById("upq");if(!p||!d)return;
+ d.innerHTML='<div class="upc"><div style="font:800 22px Urbanist">Did the payment go through?</div><div class="lb" style="margin:6px 0 14px">'+inr(p.a)+' to '+esc(p.n)+' \u00B7 '+esc(p.c)+'</div>'+
+ '<div class="tog">Take it off my Grox balance<div class="sw'+(UQ.u?" on":"")+'" onclick="UQ.u=!UQ.u;upqDraw()"></div></div><button class="go" style="margin-top:16px" onclick="upiYes()">Yes, log it</button>'+
+ '<div style="display:flex;gap:10px;margin-top:10px"><button class="chip" style="flex:1;height:46px;font-size:15px" onclick="upiNo()">No, it failed</button><button class="chip" style="flex:1;height:46px;font-size:15px" onclick="upiClose()">Not sure yet</button></div></div>'}
+window.upqDraw=draw;window.UQ=UQ;window.UP=UP;
+window.upiAsk=function(){var p=S.upp;if(!p||document.getElementById("upq"))return;UQ.u=S.bal>=p.a?1:0;var d=document.createElement("div");d.id="upq";document.getElementById("app").appendChild(d);draw()};
+window.upiClose=function(){var d=document.getElementById("upq");if(d)d.remove()};
+window.upiYes=function(){var p=S.upp;if(!p)return upiClose();var id=Date.now();
+ S.tx.push({id:id,n:p.n,a:-p.a,t:id,c:p.c,u:UQ.u?1:0});if(UQ.u)S.bal=r2(S.bal-p.a);
+ delete S.upp;notify("UPI payment logged",p.n+" \u00B7 \u2212"+$(p.a));save();upiClose();toast("Payment logged");bchk();go("home")};
+window.upiNo=function(){delete S.upp;save();upiClose();toast("Not logged");if(V=="upipay")go("upi");else render()};
+
+/* ----- payments captured by the Android shell (FamApp screen watcher) ----- */
+window.groxImport=function(list){var n=0;(list||[]).forEach(function(it){var a=parseFloat(it.a);if(!(a>0))return;
+ var ref=it.id||("fam"+Math.round(a*100)+"-"+Math.round((it.t||0)/6e4));if(S.tx.some(function(x){return x.ref==ref}))return;
+ var c="Miscellaneous",nm=String(it.n||"").replace(/['"\\<>&]/g,"").trim().slice(0,24)||"FamApp payment",t=it.t||Date.now(),p=S.upp;
+ if(p&&Math.abs(p.a-a)<.005&&Date.now()-p.t<36e5){c=p.c;nm=p.n;delete S.upp;upiClose()}
+ var u=S.bal>=a?1:0,id=Date.now()+n;S.tx.push({id:id,n:nm,a:-a,t:t,c:c,u:u,ref:ref});if(u)S.bal=r2(S.bal-a);n++});
+ if(n){notify("FamApp payments recorded",n+(n>1?" new payments":" new payment"));save();bchk();render()}return n};
+function drain(){if(!window.GroxAndroid)return;try{var q=JSON.parse(GroxAndroid.peek()||"[]");if(q.length){groxImport(q);GroxAndroid.ack(q.length)}}catch(e){}}
+drain();setInterval(function(){if(!document.hidden)drain()},4000);document.addEventListener("visibilitychange",function(){if(!document.hidden)drain()});
+/* ----- hooks ----- */
+X.upi=window.upiv;X.upiscan=window.upiscanv;X.upiadd=window.upiaddv;X.upipay=window.upipayv;
+var _hu=home;home=function(){var h=_hu(),L=pl(),s;
+ if(!L.length)s='<h3>UPI Pay</h3><div class="pn" onclick="go(\'upiscan\')" style="cursor:pointer;padding:14px 16px"><b>Scan to pay</b><div class="lb" style="font-size:13px;margin-top:2px">Scan a UPI QR and pay in your own UPI app</div></div>'+pend(0);
+ else s='<h3>UPI Pay <a onclick="go(\'upi\')">Manage</a></h3><div class="ppl" style="justify-content:flex-start;gap:12px;overflow-x:auto;scrollbar-width:none">'+'<div class="pp upp" onclick="go(\'upiscan\')"><div class="av" style="display:grid;place-items:center;background:var(--g,#00c764);color:#04231a;margin:0 auto 5px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 14v7h-4M14 21h.01"/></svg></div>Scan</div>'+L.slice(0,5).map(function(p){return '<div class="pp upp" onclick="upiStart('+p.id+')">'+uav(p,56)+esc(p.n.split(" ")[0])+'</div>'}).join("")+'</div>'+pend(0);
+ return h.indexOf("<h3>Analytics</h3>")>=0?h.replace("<h3>Analytics</h3>",function(){return s+"<h3>Analytics</h3>"}):h.indexOf("<h3>Recent")>=0?h.replace("<h3>Recent",function(){return s+"<h3>Recent"}):h+s};
+document.addEventListener("visibilitychange",function(){if(!document.hidden&&S.upp)setTimeout(window.upiAsk,350)});
+window.addEventListener("pageshow",function(e){if(e.persisted&&S.upp)setTimeout(window.upiAsk,350)});
+if(S.upp)setTimeout(window.upiAsk,2000);
+render();
+})();
 </script>
 </body></html>
