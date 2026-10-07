@@ -970,6 +970,17 @@ window.groxImport=function(list){var n=0;(list||[]).forEach(function(it){var a=p
  if(n){notify("FamApp payments recorded",n+(n>1?" new payments":" new payment"));save();bchk();render()}return n};
 function drain(){if(!window.GroxAndroid)return;try{var q=JSON.parse(GroxAndroid.peek()||"[]");if(q.length){groxImport(q);GroxAndroid.ack(q.length)}}catch(e){}}
 drain();setInterval(function(){if(!document.hidden)drain()},4000);document.addEventListener("visibilitychange",function(){if(!document.hidden)drain()});
+/* ----- phone back button: the Android shell calls groxBack(); true means Grox handled it ----- */
+var BK=[],_go=go;
+go=function(v,x){if(V=="upiscan"&&v!="upiscan")upiStop();if(V!==v){BK.push(V);if(BK.length>30)BK.shift()}_go(v,x)};
+window.groxBack=function(){
+ var dr=document.getElementById("dr");if(dr&&dr.className=="on"){drawer(0);return true}
+ if(document.getElementById("upq")){upiClose();return true}
+ if(lkEl&&lkEl.className)return false;
+ if(V=="home")return false;
+ var to="home";while(BK.length){var p=BK.pop();if(p!==V&&p!=="upiscan"){to=p;break}}
+ if(V=="upiscan")upiStop();
+ _go(to);return true};
 /* ----- hooks ----- */
 X.upi=window.upiv;X.upiscan=window.upiscanv;X.upiadd=window.upiaddv;X.upipay=window.upipayv;
 var _hu=home;home=function(){var h=_hu(),L=pl(),s;
