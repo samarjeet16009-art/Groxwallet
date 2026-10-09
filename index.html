@@ -399,13 +399,6 @@ function dots(v){var o="";for(var i=0;i<4;i++)o+='<i'+(i<v.length?' class="f"':'
 function dots2(v){var o="";for(var i=0;i<2;i++)o+='<i'+(i<v.length?' class="f"':'')+'></i>';return o}
 function kpd(f){return '<div class="kpad" style="width:100%">'+["1","2","3","4","5","6","7","8","9","","0","<"].map(function(k){return k===""?'<span></span>':'<button class="kp" onclick="'+f+'(\''+k+'\')">'+(k=="<"?I("bksp",24):k)+'</button>'}).join("")+'</div>'}
 
-/* ---------- Start popup (shows once per app start, after PIN unlock) ---------- */
-(function(){var st=document.createElement("style");st.textContent="#sal{position:absolute;inset:0;z-index:29;display:flex;align-items:center;justify-content:center;padding:28px;background:#000c;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);animation:salin .25s ease}#sal .sc{width:100%;max-width:340px;text-align:center;padding:30px 24px 24px;border-radius:28px;background:#06130d;box-shadow:inset 0 1px 0 #ffffff26,0 20px 60px #000a}#sal .sc b{display:block;font:800 22px Urbanist;letter-spacing:-.3px;margin:14px 0 22px;color:#fff}#sal .sc svg{margin:0 auto}@keyframes salin{from{opacity:0}to{opacity:1}}";document.head.appendChild(st)})();
-var SALD=0;
-function salute(){if(SALD)return;SALD=1;var d=document.createElement("div");d.id="sal";
- d.innerHTML='<div class="sc">'+LG(56)+'<b>Salute to gurimuri nigru</b><button class="go" id="salok">OK</button></div>';
- document.getElementById("app").appendChild(d);
- function c(){d.remove()}document.getElementById("salok").onclick=c;d.addEventListener("click",function(e){if(e.target===d)c()})}
 /* ---------- PIN lock ---------- */
 var LK={v:"",f:0,u:0,h:0,fp:false,fv:""},PS={st:"nw",v:"",n:""};
 var lkEl=document.createElement("div");lkEl.id="lk";document.getElementById("app").appendChild(lkEl);
@@ -432,7 +425,7 @@ function rfk_(k){
  if(LK.fv.length<2)return;
  setTimeout(function(){
   if(hp(LK.fv)==S.rpin){
-   toast("Recovery PIN verified");delete S.pin;delete S.rpin;save();LK.fp=false;LK.fv="";LK.v="";lkEl.className="";render();salute();
+   toast("Recovery PIN verified");delete S.pin;delete S.rpin;save();LK.fp=false;LK.fv="";LK.v="";lkEl.className="";render();
   }else{
    LK.fv="";if(rpd)rpd.innerHTML=dots2("");toast("Wrong 2-digit PIN");navigator.vibrate&&navigator.vibrate(120);
   }
@@ -445,7 +438,7 @@ function lkk(k){
  if(k=="<")LK.v=LK.v.slice(0,-1);else if(LK.v.length<4)LK.v+=k;if(pd)pd.innerHTML=dots(LK.v);
  if(LK.v.length<4)return;
  setTimeout(function(){var ok=hp(LK.v)==S.pin;LK.v="";
-  if(ok){LK.f=0;lkEl.className="";salute();return}
+  if(ok){LK.f=0;lkEl.className="";return}
   LK.f++;navigator.vibrate&&navigator.vibrate(120);if(pd)pd.classList.add("sh");setTimeout(function(){if(pd)pd.classList.remove("sh")},400);if(pd)pd.innerHTML=dots("");
   if(LK.f>=5){LK.f=0;LK.u=Date.now()+30000;if(lm)lm.textContent="Too many tries. Wait 30s"}else if(lm)lm.textContent="Wrong PIN"},140)}
 document.addEventListener("keydown",function(e){if(!lkEl.className)return;e.stopImmediatePropagation();if(/^[0-9]$/.test(e.key)){if(LK.fp)rfk_(e.key);else lkk(e.key)}else if(e.key=="Backspace"){if(LK.fp)rfk_("<");else lkk("<")}},true);
@@ -644,7 +637,7 @@ var _hd=header;header=function(){return _hd().replace('<div style="display:flex;
 var LV="",FTM=0;
 var X={bud:budv,badges:bdgv,pin:pinv,theme:thv,cats:catv,activity:actv},_r=render;
 render=function(){theme();syncCats();chk();if(X[V])document.getElementById("view").innerHTML=X[V]();else _r();if(V!=LV){LV=V;var vw=document.getElementById("view");vw.scrollTop=0;vw.classList.add("fin");clearTimeout(FTM);FTM=setTimeout(function(){vw.classList.remove("fin")},450)}fabSync()};
-syncCats();drawer(0);render();if(S.pin)lkDraw();else{var spEl=document.createElement("div");spEl.id="sp";spEl.innerHTML=LG(84)+"<b>Grox Wallet</b>";document.getElementById("app").appendChild(spEl);setTimeout(function(){spEl.className="h"},1100);setTimeout(function(){spEl.remove();salute()},1700)}
+syncCats();drawer(0);render();if(S.pin)lkDraw();else{var spEl=document.createElement("div");spEl.id="sp";spEl.innerHTML=LG(84)+"<b>Grox Wallet</b>";document.getElementById("app").appendChild(spEl);setTimeout(function(){spEl.className="h"},1100);setTimeout(function(){spEl.remove()},1700)}
 </script>
 <style>
 /* analytics upgrade */
